@@ -2,6 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include "Ball.h"
 
+float frictionCoefficient = 0.25f;
+float minimumFriction = 0.1f;
+
 int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1000, 800 }), "Billiards");
@@ -12,7 +15,7 @@ int main()
     testBall.setOrigin({testBall.getRadius(), testBall.getRadius()});
     
     // Useful parameters
-    float poolCuePower = 1;
+    float poolCuePower = 2;
 
     bool paused = false;
     sf::Vector2f mouseForceVector{};
@@ -42,7 +45,7 @@ int main()
                 if (keyReleased->button == sf::Mouse::Button::Left) {
                     sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                     mouseForceVector = mouseForceVector - localMousePosition;
-                    testBall.AddForce(mouseForceVector);
+                    testBall.AddForce(mouseForceVector * poolCuePower);
 
                     paused = false;
                 }
