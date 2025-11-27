@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="VertexTest.vcxproj" Id="55883c7a-c95d-41f7-882f-5c763d358416" />
+</Solution>
