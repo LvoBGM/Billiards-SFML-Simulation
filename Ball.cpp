@@ -16,16 +16,16 @@ void Ball::UpdatePosition(const float& dt, const sf::Vector2u& windowSize) {
 	auto position = getPosition();
 	auto radius = getRadius();
 	if (position.x - radius <= 0.f) { // Left side
-
+		finalForce = { -finalForce.x, finalForce.y };
 	}
 	if (position.x + radius >= windowSize.x) { // Right side
-
+		finalForce = { -finalForce.x, finalForce.y };
 	}
 	if (position.y - radius <= 0.f) { // Top side
-
+		finalForce = { finalForce.x, -finalForce.y };
 	}
 	if (position.y + radius >= windowSize.y) { // Bottom side
-
+		finalForce = { finalForce.x, -finalForce.y };
 	}
 
 	// We conserve the momentum from the previous position update

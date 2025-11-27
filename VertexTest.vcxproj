@@ -135,7 +135,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Ball.cpp" />
-    <ClCompile Include="mian.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ball.h" />
