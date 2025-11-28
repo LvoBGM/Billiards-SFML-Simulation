@@ -13,6 +13,12 @@ int main()
     testBall.setPosition({200, 200});
     testBall.setFillColor(sf::Color::Red);
     testBall.setOrigin({testBall.getRadius(), testBall.getRadius()});
+
+    Ball testBall2{ 50, 50 };
+    testBall2.setPosition({ 400, 400 });
+    testBall2.setFillColor(sf::Color::Green);
+    testBall2.setOrigin({ testBall.getRadius(), testBall.getRadius() });
+
     
     // Useful parameters
     float poolCuePower = 2;
@@ -45,7 +51,7 @@ int main()
                 if (keyReleased->button == sf::Mouse::Button::Left) {
                     sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                     mouseForceVector = mouseForceVector - localMousePosition;
-                    testBall.AddForce(mouseForceVector * poolCuePower);
+                    testBall.addForce(mouseForceVector * poolCuePower);
 
                     paused = false;
                 }
@@ -53,11 +59,13 @@ int main()
         }
         if (!paused) {
             // Update physics
-            testBall.UpdatePosition(deltaTime, window.getSize());
+            testBall.updatePosition(deltaTime, window.getSize());
+            testBall2.updatePosition(deltaTime, window.getSize());
         }
         
         window.clear();
         window.draw(testBall);
+        window.draw(testBall2);
         window.display();
     }
 }
