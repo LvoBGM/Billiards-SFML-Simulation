@@ -6,13 +6,8 @@ class Ball :
 {
 public:
     using CircleShape::CircleShape;
-    inline static std::vector<Ball*> s_Balls;
-
-    Ball(float radius, std::size_t pointCount = 30)
-        : sf::CircleShape(radius, pointCount)
-    {
-        s_Balls.push_back(this);
-    }
+    inline static std::vector<std::unique_ptr<Ball>> s_Balls;
+    static Ball& makeBall(float size, sf::Vector2f position, sf::Color color);
 
     void addForce(sf::Vector2f force);
     void updatePosition(const float& dt, const sf::Vector2u& windowSize);

@@ -8,6 +8,16 @@ void Ball::setInsideBall(bool b) {
 	m_insideBall = b;
 }
 
+Ball& Ball::makeBall(float size, sf::Vector2f position, sf::Color color) {
+	auto ballPtr = std::make_unique<Ball>(size, size);
+	ballPtr->setPosition(position);
+	ballPtr->setFillColor(color);
+	ballPtr->setOrigin({ ballPtr->getRadius(), ballPtr->getRadius() });
+
+	s_Balls.push_back(std::move(ballPtr));
+	return *ballPtr;
+}
+
 void Ball::movingCollision(const float& dt, const sf::Vector2u& windowSize, Ball* hitterBall) {
 	sf::Vector2f finalForce = m_calculatedFinalForce;
 
@@ -34,19 +44,19 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 
 	// Check if we've hit a ball
 	bool hitBall = false;
-	for (Ball* ball : s_Balls) {
+	for (const std::unique_ptr<Ball>& ball : s_Balls) {
 		auto thisToballVector = ball->getPosition() - getPosition();
 
 		float distance = std::sqrt(thisToballVector.x * thisToballVector.x + thisToballVector.y * thisToballVector.y);
 
 		if (distance - getRadius() < ball->getRadius()) {
-			if (ball == this) {
+			if (ball.get() == this) {
 				continue;
 			}
 			else {
 				hitBall = true;
 				if (!m_insideBall && finalForce != sf::Vector2f{0,0}) {
-					finalForce = _ballCollision(ball, finalForce);
+					finalForce = _ballCollision(ball.get(), finalForce);
 				}
 			}
 		}
@@ -136,7 +146,6 @@ sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce,
 
 	// If beta is more than 90, a collision is not possible
 	if (beta > sf::degrees(90) || beta < sf::degrees(-90)) {
-		std::cout << "Returnvame\n";
 		return finalForce;
 	}
 	

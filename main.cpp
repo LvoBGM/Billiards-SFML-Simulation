@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <SFML/Graphics.hpp>
 #include "Ball.h"
 
@@ -9,21 +10,14 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1000, 800 }), "Billiards");
     
-    Ball testBall{ 50, 50 };
-    testBall.setPosition({200, 200});
-    testBall.setFillColor(sf::Color::Red);
-    testBall.setOrigin({testBall.getRadius(), testBall.getRadius()});
-
-    Ball testBall2{ 50, 50 };
-    testBall2.setPosition({ 400, 400 });
-    testBall2.setFillColor(sf::Color::Green);
-    testBall2.setOrigin({ testBall2.getRadius(), testBall2.getRadius() });
+    Ball::makeBall(50, { 200, 200 }, sf::Color::Red);
 
     
     // Useful parameters
     float poolCuePower = 2;
 
     bool paused = false;
+    bool rightMousePressed = false;
     Ball* selectedBall = nullptr;
     sf::Vector2f mouseForceVector{};
     sf::Clock clock;
@@ -36,7 +30,7 @@ int main()
                 window.close();
             else if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 if (keyPressed->button == sf::Mouse::Button::Left && !paused) {
-                    for (Ball* ball : Ball::s_Balls) {
+                    for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                         sf::Vector2f mouseToBallVector = ball->getPosition() - localMousePosition;
 
@@ -44,11 +38,15 @@ int main()
 
                         if (distance < ball->getRadius()) {
                             mouseForceVector = ball->getPosition();
-                            selectedBall = ball;
+                            selectedBall = ball.get();
                             paused = true;
                             break;
                         }
                     }
+                }
+                else if (keyPressed->button == sf::Mouse::Button::Right && !paused) {
+                    sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+                    Ball::makeBall(50, localMousePosition, sf::Color::Green);
                 }
                     
             }
@@ -64,17 +62,22 @@ int main()
                         paused = false;
                     }
                 }
+                else if (keyReleased->button == sf::Mouse::Button::Right) {
+                    rightMousePressed = false;
+                }
             }
         }
         if (!paused) {
             // Update physics
-            testBall.updatePosition(deltaTime, window.getSize());
-            testBall2.updatePosition(deltaTime, window.getSize());
+            for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
+                ball->updatePosition(deltaTime, window.getSize());
+            }
         }
         
         window.clear();
-        window.draw(testBall);
-        window.draw(testBall2);
+        for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
+            window.draw(*ball);
+        }
         window.display();
     }
 }
