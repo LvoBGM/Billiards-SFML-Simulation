@@ -61,7 +61,6 @@ int main()
             // Update physics
             testBall.updatePosition(deltaTime, window.getSize());
             testBall2.updatePosition(deltaTime, window.getSize());
-            std::cout << testBall2.getPosition().x << ", " << testBall2.getPosition().y << std::endl;
         }
         
         window.clear();
