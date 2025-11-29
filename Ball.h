@@ -21,10 +21,10 @@ public:
     void movingCollision(const float& dt, const sf::Vector2u& windowSize, Ball* hitterBall);
 private:
     std::vector<sf::Vector2f> m_forces;
-    bool m_insideBall;
+    bool m_insideBall = false;
     bool m_finalForceCalculated = false;
 
-    float m_dt;
+    float m_dt = 0.f;
     sf::Vector2u m_windowSize;
     sf::Vector2f m_calculatedFinalForce;
 

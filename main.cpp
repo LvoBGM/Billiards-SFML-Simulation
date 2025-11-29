@@ -24,6 +24,7 @@ int main()
     float poolCuePower = 2;
 
     bool paused = false;
+    Ball* selectedBall = nullptr;
     sf::Vector2f mouseForceVector{};
     sf::Clock clock;
     while (window.isOpen()) {
@@ -34,26 +35,34 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
             else if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
-                if (keyPressed->button == sf::Mouse::Button::Left) {
-                    sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-                    sf::Vector2f mouseToBallVector = testBall.getPosition() - localMousePosition;
+                if (keyPressed->button == sf::Mouse::Button::Left && !paused) {
+                    for (Ball* ball : Ball::s_Balls) {
+                        sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+                        sf::Vector2f mouseToBallVector = ball->getPosition() - localMousePosition;
 
-                    float distance = std::sqrt(mouseToBallVector.x * mouseToBallVector.x + mouseToBallVector.y * mouseToBallVector.y);
+                        float distance = std::sqrt(mouseToBallVector.x * mouseToBallVector.x + mouseToBallVector.y * mouseToBallVector.y);
 
-                    if (distance < testBall.getRadius()) {
-                        mouseForceVector = testBall.getPosition();
-                        paused = true;
+                        if (distance < ball->getRadius()) {
+                            mouseForceVector = ball->getPosition();
+                            selectedBall = ball;
+                            paused = true;
+                            break;
+                        }
                     }
                 }
                     
             }
             else if (const auto* keyReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
                 if (keyReleased->button == sf::Mouse::Button::Left) {
-                    sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-                    mouseForceVector = mouseForceVector - localMousePosition;
-                    testBall.addForce(mouseForceVector * poolCuePower);
+                    if (paused) {
+                        sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+                        mouseForceVector = mouseForceVector - localMousePosition;
+                        selectedBall->addForce(mouseForceVector * poolCuePower);
 
-                    paused = false;
+                        selectedBall = nullptr;
+
+                        paused = false;
+                    }
                 }
             }
         }
