@@ -61,7 +61,7 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 			else {
 				hitBall = true;
 				if (!m_insideBall && finalForce != sf::Vector2f{0,0}) {
-					_ballCollision(ball, finalForce); // There might be a bug if you somehow hit whe exact frame 2 balls collide and push one of them
+					_ballCollision(ball, finalForce);
 				}
 				else {
 					//std::cout << "InsideBall!" << std::endl;
@@ -86,6 +86,11 @@ void Ball::_ballCollision(Ball* hitBall, sf::Vector2f& finalForce) {
 
 	// Calculate angle of the new force of the hitter ball
 	sf::Angle beta = finalForce.angleTo(thisToBallVector);
+
+	// If beta is more than 90, a collision is not possible
+	if (beta > sf::degrees(90) && beta < sf::degrees(-90)) {
+		return;
+	}
 	
 	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
 		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
