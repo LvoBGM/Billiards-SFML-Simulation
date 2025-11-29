@@ -22,5 +22,6 @@ private:
     bool m_insideBall;
 
     void _ballCollision(Ball* hitBall, sf::Vector2f& finalForce);
+    void _outOfBoundCheck(const sf::Vector2f& position, const float& radius, const sf::Vector2u windowSize);
 };
 

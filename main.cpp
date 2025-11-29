@@ -17,7 +17,7 @@ int main()
     Ball testBall2{ 50, 50 };
     testBall2.setPosition({ 400, 400 });
     testBall2.setFillColor(sf::Color::Green);
-    testBall2.setOrigin({ testBall.getRadius(), testBall.getRadius() });
+    testBall2.setOrigin({ testBall2.getRadius(), testBall2.getRadius() });
 
     
     // Useful parameters
@@ -61,6 +61,7 @@ int main()
             // Update physics
             testBall.updatePosition(deltaTime, window.getSize());
             testBall2.updatePosition(deltaTime, window.getSize());
+            std::cout << testBall2.getPosition().x << ", " << testBall2.getPosition().y << std::endl;
         }
         
         window.clear();

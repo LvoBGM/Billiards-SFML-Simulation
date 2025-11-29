@@ -31,24 +31,32 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 	else {
 		finalForce *= (lengthAfterMinFriction / speed); // Add constant friction, for more realistic stop
 	}
+
 	// Check if we've hit a wall
 	auto position = getPosition();
 	auto radius = getRadius();
+	float wallPushBackForce = 0.1;
 	if (position.x - radius <= 0.f) { // Left side
 		finalForce = { -finalForce.x, finalForce.y };
+		finalForce += { wallPushBackForce,0};
 	}
 	if (position.x + radius >= windowSize.x) { // Right side
 		finalForce = { -finalForce.x, finalForce.y };
+		finalForce += { -wallPushBackForce,0 };
 	}
 	if (position.y - radius <= 0.f) { // Top side
 		finalForce = { finalForce.x, -finalForce.y };
+		finalForce += { 0,wallPushBackForce };
 	}
 	if (position.y + radius >= windowSize.y) { // Bottom side
 		finalForce = { finalForce.x, -finalForce.y };
+		finalForce += { 0, -wallPushBackForce };
 	}
 
-	bool hitBall = false;
+	_outOfBoundCheck(position, radius, windowSize);
+
 	// Check if we've hit a ball
+	bool hitBall = false;
 	for (Ball* ball : s_Balls) {
 		auto thisToballVector = ball->getPosition() - position;
 
@@ -63,9 +71,6 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 				if (!m_insideBall && finalForce != sf::Vector2f{0,0}) {
 					_ballCollision(ball, finalForce);
 				}
-				else {
-					//std::cout << "InsideBall!" << std::endl;
-				}
 			}
 		}
 	}
@@ -78,6 +83,23 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 	m_forces.emplace_back(finalForce);
 
 	move({ finalForce.x * dt, finalForce.y * dt });
+}
+
+// Check if we're outside the window
+void Ball::_outOfBoundCheck(const sf::Vector2f& position, const float& radius, const sf::Vector2u windowSize) {
+	
+	if (position.x < 0) {
+		setPosition({ radius, position.y });
+	}
+	else if (position.x > windowSize.x) {
+		setPosition({ windowSize.x - radius, position.y });
+	}
+	if (position.y < 0) {
+		setPosition({ position.x, radius });
+	}
+	else if (position.y > windowSize.y) {
+		setPosition({ position.x, windowSize.y - radius });
+	}
 }
 
 // Takes a force Vector and a hit ball, adds a force to the hit ball and changes the final force
