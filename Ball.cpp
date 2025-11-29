@@ -8,16 +8,29 @@ void Ball::setInsideBall(bool b) {
 	m_insideBall = b;
 }
 
-void movingCollision(Ball* hitterBall) {
+void Ball::movingCollision(const float& dt, const sf::Vector2u& windowSize, Ball* hitterBall) {
+	sf::Vector2f finalForce = m_calculatedFinalForce;
 
+	_ballCollision(hitterBall, finalForce, false);
 }
 
 extern float frictionCoefficient;
 extern float minimumFriction;
 void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
-	sf::Vector2f finalForce = _calculateFinalForce(dt, windowSize);
+	// Update members
+	m_dt = dt;
+	m_windowSize = windowSize;
 
-	_outOfBoundCheck(getPosition(), getRadius(), windowSize);
+	sf::Vector2f finalForce;
+	if (!m_finalForceCalculated) {
+		finalForce = calculateFinalForce(dt, windowSize);
+	}
+	else {
+		finalForce = m_calculatedFinalForce;
+	}
+	
+
+	_outOfBoundCheck(getPosition(), getRadius());
 
 	// Check if we've hit a ball
 	bool hitBall = false;
@@ -33,7 +46,6 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 			else {
 				hitBall = true;
 				if (!m_insideBall && finalForce != sf::Vector2f{0,0}) {
-					std::cout << "Hit ball!\n";
 					finalForce = _ballCollision(ball, finalForce);
 				}
 			}
@@ -46,11 +58,12 @@ void Ball::updatePosition(const float& dt, const sf::Vector2u& windowSize) {
 
 	// We conserve the momentum from the previous position update
 	m_forces.emplace_back(finalForce);
+	m_finalForceCalculated = false;
 
 	move({ finalForce.x * dt, finalForce.y * dt });
 }
 
-sf::Vector2f Ball::_calculateFinalForce(const float& dt, const sf::Vector2u& windowSize) {
+sf::Vector2f Ball::calculateFinalForce(const float& dt, const sf::Vector2u& windowSize) {
 	// Calculate final force
 	sf::Vector2f finalForce{ 0.f, 0.f };
 	for (auto force : m_forces) {
@@ -92,28 +105,30 @@ sf::Vector2f Ball::_calculateFinalForce(const float& dt, const sf::Vector2u& win
 		finalForce += { 0, -wallPushBackForce };
 	}
 
+	m_finalForceCalculated = true;
+	m_calculatedFinalForce = finalForce;
 	return finalForce;
 }
 
 // Check if we're outside the window
-void Ball::_outOfBoundCheck(const sf::Vector2f& position, const float& radius, const sf::Vector2u windowSize) {
+void Ball::_outOfBoundCheck(const sf::Vector2f& position, const float& radius) {
 	
 	if (position.x < 0) {
 		setPosition({ radius, position.y });
 	}
-	else if (position.x > windowSize.x) {
-		setPosition({ windowSize.x - radius, position.y });
+	else if (position.x > m_windowSize.x) {
+		setPosition({ m_windowSize.x - radius, position.y });
 	}
 	if (position.y < 0) {
 		setPosition({ position.x, radius });
 	}
-	else if (position.y > windowSize.y) {
-		setPosition({ position.x, windowSize.y - radius });
+	else if (position.y > m_windowSize.y) {
+		setPosition({ position.x, m_windowSize.y - radius });
 	}
 }
 
 // Takes a force Vector and a hit ball, adds a force to the hit ball and returns the final force
-sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce) {
+sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce, bool isHitterBall) {
 	auto thisToBallVector = hitBall->getPosition() - getPosition();
 
 	// Calculate angle of the new force of the hitter ball
@@ -137,7 +152,7 @@ sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce)
 		alpha = sf::degrees(90) - beta;
 	}
 
-	std::cout << getFillColor().toInteger() << " Ball hit at angle: " << beta.asDegrees() << std::endl;
+	//std::cout << getFillColor().toInteger() << " Ball hit at angle: " << beta.asDegrees() << std::endl;
 	
 	// Check if angle is close to 180
 	if (std::abs((beta - sf::radians(3.1415f)).asRadians()) < 0.01f) {
@@ -159,12 +174,18 @@ sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce)
 	sf::Vector2f hitterBallVector = { newFinalForceLength, newFinalForceAngle };
 	sf::Vector2f hitBallVector = { hitBallLength, hitBallAngle };
 
-	// Both balls are now in balls
-	m_insideBall = true;
-	hitBall->setInsideBall(true);
+	if (isHitterBall) {
+		// Both balls are now in balls
+		m_insideBall = true;
+		hitBall->setInsideBall(true);
 
-	std::cout << "Pushing hit ball with vector: " << hitBallVector.x << ", " << hitBallVector.y << std::endl;
-	std::cout << "Pushing hitter ball with vector " << hitterBallVector.x << ", " << hitBallVector.y << std::endl;
+		if (hitBall->calculateFinalForce(m_dt, m_windowSize) != sf::Vector2f{ 0,0 }) {
+			hitBall->movingCollision(m_dt, m_windowSize, this);
+		}
+	}
+
+	//std::cout << "Pushing hit ball with vector: " << hitBallVector.x << ", " << hitBallVector.y << std::endl;
+	//std::cout << "Pushing hitter ball with vector " << hitterBallVector.x << ", " << hitBallVector.y << std::endl;
 
 	hitBall->addForce(hitBallVector);
 	return hitterBallVector;

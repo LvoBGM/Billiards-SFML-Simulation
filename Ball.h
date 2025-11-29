@@ -16,14 +16,19 @@ public:
 
     void addForce(sf::Vector2f force);
     void updatePosition(const float& dt, const sf::Vector2u& windowSize);
+    sf::Vector2f calculateFinalForce(const float& dt, const sf::Vector2u& windowSize);
     void setInsideBall(bool b);
-    void movingCollision(Ball* hitterBall, sf::Vector2f& addedForce);
+    void movingCollision(const float& dt, const sf::Vector2u& windowSize, Ball* hitterBall);
 private:
     std::vector<sf::Vector2f> m_forces;
     bool m_insideBall;
+    bool m_finalForceCalculated = false;
 
-    sf::Vector2f _calculateFinalForce(const float& dt, const sf::Vector2u& windowSize);
-    sf::Vector2f _ballCollision(Ball* hitBall, const sf::Vector2f& finalForce);
-    void _outOfBoundCheck(const sf::Vector2f& position, const float& radius, const sf::Vector2u windowSize);
+    float m_dt;
+    sf::Vector2u m_windowSize;
+    sf::Vector2f m_calculatedFinalForce;
+
+    sf::Vector2f _ballCollision(Ball* hitBall, const sf::Vector2f& finalForce, bool isHitterBall = true);
+    void _outOfBoundCheck(const sf::Vector2f& position, const float& radius);
 };
 
