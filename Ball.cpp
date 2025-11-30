@@ -94,25 +94,61 @@ sf::Vector2f Ball::calculateFinalForce(const float& dt, const sf::Vector2u& wind
 		finalForce *= (lengthAfterMinFriction / speed); // Add constant friction, for more realistic stop
 	}
 
-	// Check if we've hit a wall
-	auto position = getPosition();
+	// Check if we are going to hit a wall
+	auto nextPosition = getPosition() + finalForce * dt;
 	auto radius = getRadius();
-	float wallPushBackForce = 5 * dt;
-	if (position.x - radius <= 0.f) { // Left side
-		finalForce = { -finalForce.x, finalForce.y };
-		finalForce += { wallPushBackForce, 0};
+
+	if (nextPosition.x - radius < 0.f) { // Left side
+		float oldLength = finalForce.length();
+		float distanceToEdge = getPosition().x - radius;
+		sf::Vector2f distanceToEdgeVector{ distanceToEdge, 0 };
+		sf::Angle angle = distanceToEdgeVector.angleTo(finalForce);
+
+		// Secant of 90 degrees is undefined
+		if (angle != sf::degrees(90)) {
+			finalForce = sf::Vector2f{ distanceToEdge * (1.f / std::cosf(angle.asRadians())), finalForce.angle() };
+
+			finalForce += {oldLength - finalForce.length(), -finalForce.angle()};
+		}
 	}
-	if (position.x + radius >= windowSize.x) { // Right side
-		finalForce = { -finalForce.x, finalForce.y };
-		finalForce += { -wallPushBackForce, 0 };
+	if (nextPosition.x + radius > windowSize.x) { // Right side
+		float oldLength = finalForce.length();
+		float distanceToEdge = windowSize.x - getPosition().x - radius;
+		sf::Vector2f distanceToEdgeVector{ distanceToEdge, 0 };
+		sf::Angle angle = distanceToEdgeVector.angleTo(finalForce);
+
+		// Secant of 90 degrees is undefined
+		if (angle != sf::degrees(90)) {
+			finalForce = sf::Vector2f{ distanceToEdge * (1.f / std::cosf(angle.asRadians())), finalForce.angle() };
+
+			finalForce += {oldLength - finalForce.length(), sf::degrees(180) - finalForce.angle()};
+		}
 	}
-	if (position.y - radius <= 0.f) { // Top side
-		finalForce = { finalForce.x, -finalForce.y };
-		finalForce += { 0, wallPushBackForce };
+	if (nextPosition.y - radius < 0.f) { // Top side
+		float oldLength = finalForce.length();
+		float distanceToEdge = getPosition().y - radius;
+		sf::Vector2f distanceToEdgeVector{ 0, distanceToEdge };
+		sf::Angle angle = distanceToEdgeVector.angleTo(finalForce);
+
+		// Secant of 90 degrees is undefined
+		if (angle != sf::degrees(90)) {
+			finalForce = sf::Vector2f{ distanceToEdge * (1.f / std::cosf(angle.asRadians())), finalForce.angle() };
+
+			finalForce += {oldLength - finalForce.length(), sf::degrees(180) - finalForce.angle()};
+		}
 	}
-	if (position.y + radius >= windowSize.y) { // Bottom side
-		finalForce = { finalForce.x, -finalForce.y };
-		finalForce += { 0, -wallPushBackForce };
+	if (nextPosition.y + radius > windowSize.y) { // Bottom side
+		float oldLength = finalForce.length();
+		float distanceToEdge = windowSize.y - getPosition().y - radius;
+		sf::Vector2f distanceToEdgeVector{ 0, distanceToEdge };
+		sf::Angle angle = distanceToEdgeVector.angleTo(finalForce);
+		
+		// Secant of 90 degrees is undefined
+		if (angle != sf::degrees(90)) {
+			finalForce = sf::Vector2f{ distanceToEdge * (1.f / std::cosf(angle.asRadians())), finalForce.angle()};
+
+			finalForce += {oldLength - finalForce.length(), -finalForce.angle()};
+		}
 	}
 
 	m_finalForceCalculated = true;

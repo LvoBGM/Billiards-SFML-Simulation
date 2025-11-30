@@ -3,8 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include "Ball.h"
 
-float frictionCoefficient = 0.25f;
-float minimumFriction = 0.1f;
+float frictionCoefficient = 0.25f; // 0.25
+float minimumFriction = 0.1f; //0.1
 
 int main()
 {
