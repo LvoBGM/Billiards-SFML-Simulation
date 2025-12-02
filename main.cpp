@@ -70,7 +70,7 @@ int main()
         if (!paused) {
             // Update physics
             for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
-                ball->updatePosition(deltaTime, window.getSize());
+                ball->calcFuturePos(deltaTime, window.getSize());
             }
         }
         
