@@ -161,6 +161,14 @@ void Ball::checkForCollisions(const float& dt)
 			float distance = vectorBetweenBalls.length() - ball1->getRadius() - ball2->getRadius();
 
 			if (distance < 0) {
+
+				std::pair<sf::Vector2f, sf::Vector2f> iHitJ1 = ballCollision(ball1, ball2);
+				std::pair<sf::Vector2f, sf::Vector2f> jHitI1 = ballCollision(ball2, ball1);
+
+				if (iHitJ1.second == sf::Vector2f{0, 0} && jHitI1.first == sf::Vector2f{0, 0}) {
+					std::cout << "dsada";
+				}
+
 				// Get pairs of new velocities
 				std::pair<sf::Vector2f, sf::Vector2f> iHitJ = ballCollision(ball1, ball2);
 				std::pair<sf::Vector2f, sf::Vector2f> jHitI = ballCollision(ball2, ball1);
@@ -173,7 +181,9 @@ void Ball::checkForCollisions(const float& dt)
 				ball1->setFuturePosition(ball1->getPosition() + ball1->getNextForce() * dt);
 				ball2->setFuturePosition(ball2->getPosition() + ball2->getNextForce() * dt);
 
-				
+				if (ball1->getNextForce().length() != 0) {
+					std::cout << ball1->getNextForce().length() << std::endl;
+				}
 				
 			}
 		}
@@ -182,16 +192,16 @@ void Ball::checkForCollisions(const float& dt)
 
 // Takes two unique pointers to balls, one a hitter and the other a stationary hit Ball, and returns a pair of the new force vectors of the balls
 std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<Ball>& hitterBall, const std::unique_ptr<Ball>& hitBall) {
+	// Check if hitter ball is not moving
+	if (hitterBall->getNextForce() == sf::Vector2f{ 0,0 }) {
+		return { {0, 0}, {0, 0} };
+	}
+	
 	auto thisToBallVector = hitBall->getPosition() - hitterBall->getPosition();
 	auto hitterNextForce = hitterBall->getNextForce();
 
 	// Calculate angle between
 	sf::Angle beta = hitterNextForce.angleTo(thisToBallVector);
-
-	// If beta is more than 90, a collision is not possible
-	if (beta > sf::degrees(90) || beta < sf::degrees(-90)) {
-		return { {0, 0}, {0, 0} };
-	}
 
 	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
 		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
