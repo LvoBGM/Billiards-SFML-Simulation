@@ -55,7 +55,7 @@ int main()
                     if (paused) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                         mouseForceVector = mouseForceVector - localMousePosition;
-                        selectedBall->addForce(mouseForceVector * poolCuePower);
+                        selectedBall->setNextForce(mouseForceVector * poolCuePower);
 
                         selectedBall = nullptr;
 
@@ -72,6 +72,10 @@ int main()
             for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
                 ball->calcFuturePos(deltaTime, window.getSize());
             }
+            // Check for collisions
+            Ball::checkForCollisions(deltaTime);
+
+            Ball::updatePositions();
         }
         
         window.clear();

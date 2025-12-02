@@ -1,7 +1,23 @@
 #include "Ball.h"
 
-void Ball::addForce(sf::Vector2f force) {
-	m_forces.emplace_back(force);
+sf::Vector2f Ball::getNextForce()
+{
+	return m_nextForce;
+}
+
+sf::Vector2f Ball::getFuturePosition()
+{
+	return m_futurePosition;
+}
+
+void Ball::setFuturePosition(const sf::Vector2f& v)
+{
+	m_futurePosition = v;
+}
+
+void Ball::setNextForce(const sf::Vector2f v)
+{
+	m_nextForce = v;
 }
 
 Ball& Ball::makeBall(float size, sf::Vector2f position, sf::Color color) {
@@ -11,8 +27,9 @@ Ball& Ball::makeBall(float size, sf::Vector2f position, sf::Color color) {
 	ballPtr->setOrigin({ ballPtr->getRadius(), ballPtr->getRadius() });
 
 	s_Balls.push_back(std::move(ballPtr));
-	return *ballPtr;
+	return *s_Balls.back();
 }
+
 
 extern float frictionCoefficient;
 extern float minimumFriction;
@@ -26,20 +43,9 @@ void Ball::calcFuturePos(const float& dt, const sf::Vector2u& windowSize) {
 
 	// Check for wall collisions
 	wallCheck(getPosition());
-
-	// Conserve force to next frame
-	addForce(m_nextForce);
-
-	setPosition(m_futurePosition);
 }
 
 void Ball::calculateNextPosition(const float& dt, const sf::Vector2u& windowSize) {
-	// Calculate final force
-	m_nextForce = { 0.f, 0.f };
-	for (auto force : m_forces) {
-		m_nextForce += force;
-	}
-	m_forces.clear();
 
 	m_nextForce *= std::pow(1.f - (frictionCoefficient), dt);
 
@@ -140,66 +146,96 @@ void Ball::wallCheck(const sf::Vector2f& position) {
 	}
 }
 
-//// Takes a force Vector and a hit ball, adds a force to the hit ball and returns the final force
-//sf::Vector2f Ball::_ballCollision(Ball* hitBall, const sf::Vector2f& finalForce, bool isHitterBall) {
-//	auto thisToBallVector = hitBall->getPosition() - getPosition();
-//
-//	// Calculate angle of the new force of the hitter ball
-//	sf::Angle beta = finalForce.angleTo(thisToBallVector);
-//
-//	// If beta is more than 90, a collision is not possible
-//	if (beta > sf::degrees(90) || beta < sf::degrees(-90)) {
-//		return finalForce;
-//	}
-//	
-//	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
-//		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
-//		beta.asDegrees() << std::endl;*/
-//
-//	sf::Angle alpha;
-//	if (beta < sf::degrees(0)) {
-//		alpha = sf::degrees(-90) - beta;
-//	}
-//	else {
-//		alpha = sf::degrees(90) - beta;
-//	}
-//
-//	//std::cout << getFillColor().toInteger() << " Ball hit at angle: " << beta.asDegrees() << std::endl;
-//	
-//	// Check if angle is close to 180
-//	if (std::abs((beta - sf::radians(3.1415f)).asRadians()) < 0.01f) {
-//		hitBall->addForce(-finalForce);
-//		return -finalForce;
-//	}
-//
-//	float finalForceLength = sqrt(finalForce.x*finalForce.x + finalForce.y*finalForce.y);
-//
-//	// Hitter ball
-//	sf::Angle newFinalForceAngle = finalForce.angle() - alpha;
-//	float newFinalForceLength = finalForceLength * std::sin(std::abs(beta.asRadians()));
-//
-//	// Hit ball
-//	sf::Angle hitBallAngle = finalForce.angle() + beta;
-//	float hitBallLength = finalForceLength * std::sin(std::abs(alpha.asRadians()));
-//
-//	//std::cout << "Hitter vector: " << newFinalForceLength << ", " << newFinalForceAngle.asDegrees() << std::endl;
-//	sf::Vector2f hitterBallVector = { newFinalForceLength, newFinalForceAngle };
-//	sf::Vector2f hitBallVector = { hitBallLength, hitBallAngle };
-//
-//	if (isHitterBall) {
-//		// Both balls are now in balls
-//		m_insideBall = true;
-//		hitBall->setInsideBall(true);
-//
-//		if (hitBall->calculateFinalForce(m_dt, m_windowSize) != sf::Vector2f{ 0,0 }) {
-//			hitBall->movingCollision(m_dt, m_windowSize, this);
-//		}
-//	}
-//
-//	//std::cout << "Pushing hit ball with vector: " << hitBallVector.x << ", " << hitBallVector.y << std::endl;
-//	//std::cout << "Pushing hitter ball with vector " << hitterBallVector.x << ", " << hitBallVector.y << std::endl;
-//
-//	hitBall->addForce(hitBallVector);
-//	return hitterBallVector;
-//	
-//}
+// Check for any collisions between balls and update their vectors accordingly
+void Ball::checkForCollisions(const float& dt)
+{
+	for (std::size_t i = 0; i < s_Balls.size(); i++) {
+		for (std::size_t j = i + 1; j < s_Balls.size(); j++) {
+			// Set up balls
+			const std::unique_ptr<Ball>& ball1 = s_Balls[i];
+			const std::unique_ptr<Ball>& ball2 = s_Balls[j];
+
+			auto vectorBetweenBalls = ball1->getPosition() - ball2->getPosition();
+
+			// Distance between the balls
+			float distance = vectorBetweenBalls.length() - ball1->getRadius() - ball2->getRadius();
+
+			if (distance < 0) {
+				// Get pairs of new velocities
+				std::pair<sf::Vector2f, sf::Vector2f> iHitJ = ballCollision(ball1, ball2);
+				std::pair<sf::Vector2f, sf::Vector2f> jHitI = ballCollision(ball2, ball1);
+
+				// Set new nextForce
+				ball1->setNextForce((iHitJ.first + jHitI.second));
+				ball2->setNextForce((iHitJ.second + jHitI.first));
+
+				// Recalculate future position
+				ball1->setFuturePosition(ball1->getPosition() + ball1->getNextForce() * dt);
+				ball2->setFuturePosition(ball2->getPosition() + ball2->getNextForce() * dt);
+
+				
+				
+			}
+		}
+	}
+}
+
+// Takes two unique pointers to balls, one a hitter and the other a stationary hit Ball, and returns a pair of the new force vectors of the balls
+std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<Ball>& hitterBall, const std::unique_ptr<Ball>& hitBall) {
+	auto thisToBallVector = hitBall->getPosition() - hitterBall->getPosition();
+	auto hitterNextForce = hitterBall->getNextForce();
+
+	// Calculate angle between
+	sf::Angle beta = hitterNextForce.angleTo(thisToBallVector);
+
+	// If beta is more than 90, a collision is not possible
+	if (beta > sf::degrees(90) || beta < sf::degrees(-90)) {
+		return { {0, 0}, {0, 0} };
+	}
+
+	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
+		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
+		beta.asDegrees() << std::endl;*/
+
+	sf::Angle alpha;
+	if (beta < sf::degrees(0)) {
+		alpha = sf::degrees(-90) - beta;
+	}
+	else {
+		alpha = sf::degrees(90) - beta;
+	}
+
+	//std::cout << getFillColor().toInteger() << " Ball hit at angle: " << beta.asDegrees() << std::endl;
+
+	// Check if angle is close to 180
+	if (std::abs((beta - sf::radians(3.1415f)).asRadians()) < 0.01f) {
+		return { {0, 0}, hitterNextForce };
+	}
+
+	float nextForceLength = hitterNextForce.length();
+
+	// Hitter ball
+	sf::Angle newFinalForceAngle = hitterNextForce.angle() - alpha;
+	float newFinalForceLength = nextForceLength * std::sin(std::abs(beta.asRadians()));
+
+	// Hit ball
+	sf::Angle hitBallAngle = hitterNextForce.angle() + beta;
+	float hitBallLength = nextForceLength * std::sin(std::abs(alpha.asRadians()));
+
+	//std::cout << "Hitter vector: " << newFinalForceLength << ", " << newFinalForceAngle.asDegrees() << std::endl;
+	sf::Vector2f hitterBallVector = { newFinalForceLength, newFinalForceAngle };
+	sf::Vector2f hitBallVector = { hitBallLength, hitBallAngle };
+
+	//std::cout << "Pushing hit ball with vector: " << hitBallVector.x << ", " << hitBallVector.y << std::endl;
+	//std::cout << "Pushing hitter ball with vector " << hitterBallVector.x << ", " << hitBallVector.y << std::endl;
+
+	return { hitterBallVector, hitBallVector };
+	
+}
+
+void Ball::updatePositions()
+{
+	for (const std::unique_ptr<Ball>& ball : s_Balls) {
+		ball->setPosition(ball->getFuturePosition());
+	}
+}
