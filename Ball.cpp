@@ -42,7 +42,11 @@ void Ball::calcFuturePos(const float& dt, const sf::Vector2u& windowSize) {
 	calculateNextPosition(dt, windowSize);
 
 	// Check for wall collisions
-	wallCheck(getPosition());
+	auto position = getPosition();
+	while (_wallCheck(position)) {
+		position = m_futurePosition;
+		std::cout << "Hit wall!\n";
+	}
 }
 
 void Ball::calculateNextPosition(const float& dt, const sf::Vector2u& windowSize) {
@@ -51,7 +55,7 @@ void Ball::calculateNextPosition(const float& dt, const sf::Vector2u& windowSize
 
 	// Adding fixed friction
 	float speed = m_nextForce.length();
-	float lengthAfterMinFriction = speed - minimumFriction;
+	float lengthAfterMinFriction = speed - minimumFriction * m_dt;
 	if (lengthAfterMinFriction <= 0) {
 		m_nextForce = { 0, 0 }; // If ball is reaaaally slow and the length becomes negative, we just stop the ball
 	}
@@ -63,9 +67,10 @@ void Ball::calculateNextPosition(const float& dt, const sf::Vector2u& windowSize
 }
 
 // Check if we're outside the window
-void Ball::wallCheck(const sf::Vector2f& position) {
+bool Ball::_wallCheck(const sf::Vector2f& position) {
 	// Check if we are going to hit a wall
 	auto radius = getRadius();
+	bool hitWall = false;
 
 	sf::Vector2f offset{};
 	if (m_futurePosition.x - radius < 0.f) { // Left side
@@ -85,6 +90,8 @@ void Ball::wallCheck(const sf::Vector2f& position) {
 
 			// Conserve force to the next frame
 			m_nextForce = sf::Vector2f{ std::abs(oldLength - bounceForce.length()), bounceForce.angle() };
+
+			hitWall = true;
 		}
 	}
 	if (m_futurePosition.x + radius > m_windowSize.x) { // Right side
@@ -104,6 +111,8 @@ void Ball::wallCheck(const sf::Vector2f& position) {
 
 			// Conserve force to the next frame
 			m_nextForce = sf::Vector2f{ std::abs(oldLength - bounceForce.length()), bounceForce.angle() };
+
+			hitWall = true;
 		}
 	}
 	if (m_futurePosition.y - radius < 0.f) { // Top side
@@ -123,6 +132,8 @@ void Ball::wallCheck(const sf::Vector2f& position) {
 
 			// Conserve force to the next frame
 			m_nextForce = sf::Vector2f{ std::abs(oldLength - bounceForce.length()), bounceForce.angle() };
+
+			hitWall = true;
 		}
 	}
 	if (m_futurePosition.y + radius > m_windowSize.y) { // Bottom side
@@ -142,8 +153,11 @@ void Ball::wallCheck(const sf::Vector2f& position) {
 
 			// Conserve force to the next frame
 			m_nextForce = sf::Vector2f{ std::abs(oldLength - bounceForce.length()), bounceForce.angle() };
+
+			hitWall = true;
 		}
 	}
+	return hitWall;
 }
 
 // Check for any collisions between balls and update their vectors accordingly

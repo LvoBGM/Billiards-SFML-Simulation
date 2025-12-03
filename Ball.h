@@ -16,9 +16,12 @@ public:
     static std::pair<sf::Vector2f, sf::Vector2f> ballCollision(const std::unique_ptr<Ball>& hitterBall, const std::unique_ptr<Ball>& hitBall);
     static void updatePositions();
 
-    void calculateNextPosition(const float& dt, const sf::Vector2u& windowSize);
 
+    // Calculate the future position after wall detection
     void calcFuturePos(const float& dt, const sf::Vector2u& windowSize);
+
+    // Calculate the next position before any collision detetction
+    void calculateNextPosition(const float& dt, const sf::Vector2u& windowSize);
 
     // Getters
     sf::Vector2f getNextForce();
@@ -35,6 +38,6 @@ private:
     sf::Vector2f m_nextForce;
     sf::Vector2f m_futurePosition;
 
-    void wallCheck(const sf::Vector2f& position);
+    bool _wallCheck(const sf::Vector2f& position);
 };
 
