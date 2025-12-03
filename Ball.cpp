@@ -165,13 +165,18 @@ void Ball::checkForCollisions(const float& dt)
 				std::pair<sf::Vector2f, sf::Vector2f> iHitJ1 = ballCollision(ball1, ball2);
 				std::pair<sf::Vector2f, sf::Vector2f> jHitI1 = ballCollision(ball2, ball1);
 
-				if (iHitJ1.second == sf::Vector2f{0, 0} && jHitI1.first == sf::Vector2f{0, 0}) {
+				if (iHitJ1 == std::pair<sf::Vector2f, sf::Vector2f>{ {0, 0}, { 0, 0 } }&& iHitJ1 == std::pair<sf::Vector2f, sf::Vector2f> { {0, 0}, { 0, 0 } }) {
 					std::cout << "dsada";
 				}
 
 				// Get pairs of new velocities
 				std::pair<sf::Vector2f, sf::Vector2f> iHitJ = ballCollision(ball1, ball2);
 				std::pair<sf::Vector2f, sf::Vector2f> jHitI = ballCollision(ball2, ball1);
+
+				// If both collisions return 0, then no collision took place
+				if (iHitJ == std::pair<sf::Vector2f, sf::Vector2f>{ {0, 0}, { 0, 0 } }&& jHitI == std::pair<sf::Vector2f, sf::Vector2f> { {0, 0}, { 0, 0 } }) {
+					return;
+				}
 
 				// Set new nextForce
 				ball1->setNextForce((iHitJ.first + jHitI.second));
@@ -184,7 +189,6 @@ void Ball::checkForCollisions(const float& dt)
 				if (ball1->getNextForce().length() != 0) {
 					std::cout << ball1->getNextForce().length() << std::endl;
 				}
-				
 			}
 		}
 	}
@@ -202,6 +206,11 @@ std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<
 
 	// Calculate angle between
 	sf::Angle beta = hitterNextForce.angleTo(thisToBallVector);
+
+	// If angle is more than 90 degrees a collision is not possible
+	if (beta > sf::degrees(90) || beta < sf::degrees(-90)) {
+		return { {0, 0}, {0, 0} };
+	}
 
 	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
 		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
