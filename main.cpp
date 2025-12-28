@@ -8,7 +8,7 @@ float minimumFriction = 100.f; //0.1
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({ 1000, 800 }), "Billiards");
+    sf::RenderWindow window(sf::VideoMode({ 1200, 900 }), "Billiards");
     //window.setFramerateLimit(15);
     
     Ball::makeBall(50, { 200, 200 }, sf::Color::Red);
