@@ -2,6 +2,7 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 #include "Ball.h"
+#include "Arrow.h"
 
 float frictionCoefficient = 0.25f; // 0.25
 float minimumFriction = 100.f; //0.1
@@ -13,6 +14,8 @@ int main()
     
     Ball::makeBall(50, { 200, 200 }, sf::Color::Red);
 
+    // Make Arrow
+    Arrow arrow({ 500.f, 500.f }, {600.f, 100.f}, sf::Color::Red);
     
     // Useful parameters
     float poolCuePower = 2;
@@ -78,11 +81,13 @@ int main()
 
             Ball::updatePositions();
         }
+
         
         window.clear();
         for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
             window.draw(*ball);
         }
+        window.draw(arrow);
         window.display();
     }
 }

@@ -1,4 +1,28 @@
 #include "Arrow.h"
+Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
+	m_vector = end - origin;
+
+	constexpr float lengthScale = 1;
+	float size = m_vector.length() / lengthScale;
+
+	float height = size;
+	float width = size * m_widthHeightRatio;
+
+	// Place vertexes (Arrow points to the right)
+	m_vertices = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 7);
+
+	m_vertices[0] = { -sf::Vector2f(0.f, width / 2), color };
+	m_vertices[1] = { sf::Vector2f(0.f, width / 2), color };
+	m_vertices[2] = { m_vertices[0].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), color };
+	m_vertices[3] = { m_vertices[1].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), color };
+	m_vertices[4] = { m_vertices[3].position + sf::Vector2f(0.f, width), color};
+	m_vertices[5] = { sf::Vector2f(height, 0.f), color };
+	m_vertices[6] = { m_vertices[2].position - sf::Vector2f(0.f, width), color };
+
+	this->setPosition(origin);
+	this->setRotation(m_vector.angle());
+}
+
 void Arrow::setVector(const sf::Vector2f& v) {
 	m_vector = v;
 }
