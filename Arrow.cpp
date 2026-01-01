@@ -1,5 +1,8 @@
 #include "Arrow.h"
 Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
+	// Add arrow to s_Arrows
+	s_Arrows.insert(this);
+
 	m_vector = end - origin;
 
 	constexpr float lengthScale = 1;
@@ -21,6 +24,10 @@ Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 
 	this->setPosition(origin);
 	this->setRotation(m_vector.angle());
+}
+
+Arrow::~Arrow() {
+	s_Arrows.erase(this);
 }
 
 void Arrow::setVector(const sf::Vector2f& v) {

@@ -13,9 +13,6 @@ int main()
     //window.setFramerateLimit(15);
     
     Ball::makeBall(50, { 200, 200 }, sf::Color::Red);
-
-    // Make Arrow
-    Arrow arrow({ 500.f, 500.f }, {600.f, 100.f}, sf::Color::Red);
     
     // Useful parameters
     float poolCuePower = 2;
@@ -33,6 +30,7 @@ int main()
             if (event->is<sf::Event::Closed>())
                 window.close();
             else if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
+                // Grab ball
                 if (keyPressed->button == sf::Mouse::Button::Left && !paused) {
                     for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -48,6 +46,7 @@ int main()
                         }
                     }
                 }
+                // Place ball
                 else if (keyPressed->button == sf::Mouse::Button::Right && !paused) {
                     sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                     Ball::makeBall(50, localMousePosition, sf::Color::Green);
@@ -55,6 +54,7 @@ int main()
                     
             }
             else if (const auto* keyReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
+                // Ball launched
                 if (keyReleased->button == sf::Mouse::Button::Left) {
                     if (paused) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -82,12 +82,11 @@ int main()
             Ball::updatePositions();
         }
 
-        
+        // Draw screen
         window.clear();
         for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
             window.draw(*ball);
         }
-        window.draw(arrow);
         window.display();
     }
 }
