@@ -19,6 +19,8 @@ public:
     void setVector(const sf::Vector2f& v);
     void setColor(const sf::Color& color);
 
+    sf::Vector2f getVector();
+
 private:
     void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
         states.transform *= getTransform();

@@ -25,6 +25,10 @@ void Arrow::setColor(const sf::Color & color) {
 	}
 }
 
+sf::Vector2f Arrow::getVector() {
+	return m_vector;
+}
+
 void Arrow::UpdateGeometry() {
 	constexpr float lengthScale = 1;
 	float size = m_vector.length() / lengthScale;
