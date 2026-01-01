@@ -16,6 +16,7 @@ Arrow::~Arrow() {
 
 void Arrow::setVector(const sf::Vector2f& v) {
 	m_vector = v;
+	UpdateGeometry();
 }
 
 void Arrow::setColor(const sf::Color & color) {
@@ -30,7 +31,8 @@ sf::Vector2f Arrow::getVector() {
 }
 
 void Arrow::UpdateGeometry() {
-	constexpr float lengthScale = 1;
+	// Arrow smallness
+	constexpr float lengthScale = 3;
 	float size = m_vector.length() / lengthScale;
 
 	float height = size;

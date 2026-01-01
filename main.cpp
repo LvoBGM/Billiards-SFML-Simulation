@@ -11,16 +11,16 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode({ 1200, 900 }), "Billiards");
     //window.setFramerateLimit(15);
-    
+
     Ball::makeBall(50, { 200, 200 }, sf::Color::Red);
-    
+
     // Useful parameters
     float poolCuePower = 2;
 
     bool paused = false;
     bool rightMousePressed = false;
     Ball* selectedBall = nullptr;
-    sf::Vector2f mouseForceVector{};
+    std::unique_ptr<Arrow> arrowPtr = nullptr;
     sf::Clock clock;
     while (window.isOpen()) {
 
@@ -31,18 +31,28 @@ int main()
                 window.close();
             else if (const auto* keyPressed = event->getIf<sf::Event::MouseButtonPressed>()) {
                 // Grab ball
-                if (keyPressed->button == sf::Mouse::Button::Left && !paused) {
-                    for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
-                        sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-                        sf::Vector2f mouseToBallVector = ball->getPosition() - localMousePosition;
+                if (keyPressed->button == sf::Mouse::Button::Left) {
+                    if (!paused) {
+                        for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
+                            sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+                            sf::Vector2f mouseToBallVector = ball->getPosition() - localMousePosition;
 
-                        float distance = std::sqrt(mouseToBallVector.x * mouseToBallVector.x + mouseToBallVector.y * mouseToBallVector.y);
+                            // Ball grabbed
+                            if (!paused) {
+                                float distance = std::sqrt(mouseToBallVector.x * mouseToBallVector.x + mouseToBallVector.y * mouseToBallVector.y); // TODO::Remove this
 
-                        if (distance < ball->getRadius()) {
-                            mouseForceVector = ball->getPosition();
-                            selectedBall = ball.get();
-                            paused = true;
-                            break;
+                                if (distance < ball->getRadius()) {
+                                    selectedBall = ball.get();
+
+                                    // Make Arrow
+                                    auto mirroredMousePosition = sf::Vector2f(selectedBall->getPosition().x * 2, selectedBall->getPosition().y * 2) - localMousePosition;
+                                    arrowPtr = std::make_unique<Arrow>(ball->getPosition(), mirroredMousePosition, sf::Color::Red);
+
+                                    selectedBall = ball.get();
+                                    paused = true;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -51,15 +61,14 @@ int main()
                     sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                     Ball::makeBall(50, localMousePosition, sf::Color::Green);
                 }
-                    
+
             }
             else if (const auto* keyReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
                 // Ball launched
                 if (keyReleased->button == sf::Mouse::Button::Left) {
                     if (paused) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-                        mouseForceVector = mouseForceVector - localMousePosition;
-                        selectedBall->setNextForce(mouseForceVector * poolCuePower);
+                        selectedBall->setNextForce(arrowPtr->getVector() * poolCuePower);
 
                         selectedBall = nullptr;
 
@@ -71,8 +80,8 @@ int main()
                 }
             }
         }
+        // Update physics
         if (!paused) {
-            // Update physics
             for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
                 ball->calcFuturePos(deltaTime, window.getSize());
             }
@@ -80,6 +89,17 @@ int main()
             Ball::checkForCollisions(deltaTime);
 
             Ball::updatePositions();
+        }
+        // Ball aimed
+        else {
+            if (selectedBall) {
+                sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+                auto mirroredMousePosition = sf::Vector2f(selectedBall->getPosition().x * 2, selectedBall->getPosition().y * 2) - localMousePosition;
+
+                //std::cout << mirroredMousePosition.x << " = " << localMousePosition.x << " - " << "2 * " << screenCentre.x << std::endl;
+
+                arrowPtr->setVector(mirroredMousePosition - selectedBall->getPosition());
+            }
         }
 
         // Draw screen
