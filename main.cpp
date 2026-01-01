@@ -87,6 +87,11 @@ int main()
         for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
             window.draw(*ball);
         }
+        for (const Arrow* arrow : Arrow::s_Arrows) {
+            if (arrow) {
+                window.draw(*arrow);
+            }
+        }
         window.display();
     }
 }
