@@ -4,26 +4,10 @@ Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 	s_Arrows.insert(this);
 
 	m_vector = end - origin;
-
-	constexpr float lengthScale = 1;
-	float size = m_vector.length() / lengthScale;
-
-	float height = size;
-	float width = size * m_widthHeightRatio;
-
-	// Place vertexes (Arrow points to the right)
-	m_vertices = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 7);
-
-	m_vertices[0] = { -sf::Vector2f(0.f, width / 2), color };
-	m_vertices[1] = { sf::Vector2f(0.f, width / 2), color };
-	m_vertices[2] = { m_vertices[0].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), color };
-	m_vertices[3] = { m_vertices[1].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), color };
-	m_vertices[4] = { m_vertices[3].position + sf::Vector2f(0.f, width), color};
-	m_vertices[5] = { sf::Vector2f(height, 0.f), color };
-	m_vertices[6] = { m_vertices[2].position - sf::Vector2f(0.f, width), color };
-
+	m_color = color;
 	this->setPosition(origin);
-	this->setRotation(m_vector.angle());
+
+	UpdateGeometry();
 }
 
 Arrow::~Arrow() {
@@ -39,4 +23,26 @@ void Arrow::setColor(const sf::Color & color) {
 	{
 		m_vertices[i].color = sf::Color::Red;
 	}
+}
+
+void Arrow::UpdateGeometry() {
+	constexpr float lengthScale = 1;
+	float size = m_vector.length() / lengthScale;
+
+	float height = size;
+	float width = size * m_widthHeightRatio;
+
+	// Place vertexes (Arrow points to the right)
+	m_vertices = sf::VertexArray(sf::PrimitiveType::TriangleStrip, 7);
+
+	m_vertices[0] = { -sf::Vector2f(0.f, width / 2), m_color };
+	m_vertices[1] = { sf::Vector2f(0.f, width / 2), m_color };
+	m_vertices[2] = { m_vertices[0].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), m_color };
+	m_vertices[3] = { m_vertices[1].position + sf::Vector2f(height * (1 - m_headTailRatio), 0.f), m_color };
+	m_vertices[4] = { m_vertices[3].position + sf::Vector2f(0.f, width), m_color };
+	m_vertices[5] = { sf::Vector2f(height, 0.f), m_color };
+	m_vertices[6] = { m_vertices[2].position - sf::Vector2f(0.f, width), m_color };
+;
+	this->setRotation(m_vector.angle());
+
 }

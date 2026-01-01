@@ -25,6 +25,8 @@ private:
         target.draw(m_vertices, states);
     }
 
+    void UpdateGeometry();
+
     sf::Vector2f m_vector;
     float m_widthHeightRatio = 1.f / 6.f;
     float m_headTailRatio = 1.f / 3.f;
