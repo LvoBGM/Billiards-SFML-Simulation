@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include "Arrow.h"
 class Ball :
     public sf::CircleShape
 {
@@ -26,10 +27,14 @@ public:
     // Getters
     sf::Vector2f getNextForce();
     sf::Vector2f getFuturePosition();
+    sf::Vector2f getForceArrowVector();
 
     // Setters
     void setFuturePosition(const sf::Vector2f& v);
     void setNextForce(const sf::Vector2f v);
+    void setForceArrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color);
+    void setForceArrowVector(const sf::Vector2f& v);
+    void setForceArrowPosition(const sf::Vector2f& v);
 
 private:
     // Private members
@@ -37,6 +42,7 @@ private:
     sf::Vector2u m_windowSize;
     sf::Vector2f m_nextForce;
     sf::Vector2f m_futurePosition;
+    std::unique_ptr<Arrow> m_forceArrow;
 
     bool _wallCheck(const sf::Vector2f& position);
 };

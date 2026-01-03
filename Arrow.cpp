@@ -19,6 +19,7 @@ Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 
 Arrow::~Arrow() {
 	s_Arrows.erase(this);
+	std::cout << "Arrowdead";
 }
 
 void Arrow::setVector(const sf::Vector2f& v) {

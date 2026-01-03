@@ -10,6 +10,11 @@ sf::Vector2f Ball::getFuturePosition()
 	return m_futurePosition;
 }
 
+sf::Vector2f Ball::getForceArrowVector()
+{
+	return m_forceArrow->getVector();
+}
+
 void Ball::setFuturePosition(const sf::Vector2f& v)
 {
 	m_futurePosition = v;
@@ -20,11 +25,26 @@ void Ball::setNextForce(const sf::Vector2f v)
 	m_nextForce = v;
 }
 
+void Ball::setForceArrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
+	m_forceArrow = std::make_unique<Arrow>(origin, end, color);
+}
+
+void Ball::setForceArrowVector(const sf::Vector2f& v)
+{
+	m_forceArrow->setVector(v);
+}
+
+void Ball::setForceArrowPosition(const sf::Vector2f& v)
+{
+	m_forceArrow->setPosition(v);
+}
+
 Ball& Ball::makeBall(float size, sf::Vector2f position, sf::Color color) {
 	auto ballPtr = std::make_unique<Ball>(size, size);
 	ballPtr->setPosition(position);
 	ballPtr->setFillColor(color);
 	ballPtr->setOrigin({ ballPtr->getRadius(), ballPtr->getRadius() });
+	ballPtr->setForceArrow(position, position, color);
 
 	s_Balls.push_back(std::move(ballPtr));
 	return *s_Balls.back();
@@ -270,5 +290,7 @@ void Ball::updatePositions()
 {
 	for (const std::unique_ptr<Ball>& ball : s_Balls) {
 		ball->setPosition(ball->getFuturePosition());
+		ball->setForceArrowVector(ball->getNextForce());
+		ball->setForceArrowPosition(ball->getPosition() + ball->getForceArrowVector().normalized() * ball->getRadius());
 	}
 }
