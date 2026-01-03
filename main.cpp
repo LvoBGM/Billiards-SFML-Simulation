@@ -71,6 +71,7 @@ int main()
                         selectedBall->setNextForce(arrowPtr->getVector() * poolCuePower);
 
                         selectedBall = nullptr;
+                        arrowPtr = nullptr;
 
                         paused = false;
                     }
