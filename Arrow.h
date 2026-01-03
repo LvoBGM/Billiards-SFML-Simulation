@@ -7,14 +7,9 @@ class Arrow : public sf::Drawable, public sf::Transformable
 public:
     inline static std::set<Arrow*> s_Arrows;
 
+    Arrow();
     Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color);
     ~Arrow();
-
-    // No Move and Copy constructors
-    Arrow(const Arrow&) = delete;
-    Arrow& operator=(const Arrow&) = delete;
-    Arrow(Arrow&&) = delete;
-    Arrow& operator=(Arrow&&) = delete;
 
     void setVector(const sf::Vector2f& v);
     void setColor(const sf::Color& color);

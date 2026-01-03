@@ -1,4 +1,11 @@
 #include "Arrow.h"
+Arrow::Arrow() // TODO: Add something to tell the porgramm not to draw specific arrows
+{
+	m_vector = {0.f, 0.f};
+	m_color = sf::Color::Red;
+
+	setPosition({ 0, 0 });
+}
 Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 	// Add arrow to s_Arrows
 	s_Arrows.insert(this);
