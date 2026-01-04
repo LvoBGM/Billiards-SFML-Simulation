@@ -19,6 +19,7 @@ int main()
 
     bool paused = false;
     bool rightMousePressed = false;
+    bool tPressed = false;
     Ball* selectedBall = nullptr;
     std::unique_ptr<Arrow> arrowPtr = nullptr;
     sf::Clock clock;
@@ -61,7 +62,6 @@ int main()
                     sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
                     Ball::makeBall(50, localMousePosition, sf::Color::Green);
                 }
-
             }
             else if (const auto* keyReleased = event->getIf<sf::Event::MouseButtonReleased>()) {
                 // Ball launched
@@ -78,6 +78,11 @@ int main()
                 }
                 else if (keyReleased->button == sf::Mouse::Button::Right) {
                     rightMousePressed = false;
+                }
+            }
+            else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+                if (keyPressed->scancode == sf::Keyboard::Scancode::T) {
+                    tPressed = !tPressed;
                 }
             }
         }
@@ -108,11 +113,14 @@ int main()
         for (const std::unique_ptr<Ball>& ball : Ball::s_Balls) {
             window.draw(*ball);
         }
-        for (const Arrow* arrow : Arrow::s_Arrows) {
-            if (arrow) {
-                window.draw(*arrow);
+        if (tPressed) {
+            for (const Arrow* arrow : Arrow::s_Arrows) {
+                if (arrow) {
+                    window.draw(*arrow);
+                }
             }
         }
+        
         window.display();
     }
 }
