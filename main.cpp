@@ -47,7 +47,7 @@ int main()
 
                                     // Make Arrow
                                     auto mirroredMousePosition = sf::Vector2f(selectedBall->getPosition().x * 2, selectedBall->getPosition().y * 2) - localMousePosition;
-                                    arrowPtr = std::make_unique<Arrow>(selectedBall->getPosition(), mirroredMousePosition, sf::Color::Red);
+                                    arrowPtr = std::make_unique<Arrow>(selectedBall->getPosition(), mirroredMousePosition, selectedBall->getFillColor());
 
                                     selectedBall = ball.get();
                                     paused = true;
