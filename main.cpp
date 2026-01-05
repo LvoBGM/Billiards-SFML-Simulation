@@ -40,9 +40,7 @@ int main()
 
                             // Ball grabbed
                             if (!paused) {
-                                float distance = std::sqrt(mouseToBallVector.x * mouseToBallVector.x + mouseToBallVector.y * mouseToBallVector.y); // TODO::Remove this
-
-                                if (distance < ball->getRadius()) {
+                                if (mouseToBallVector.length() < ball->getRadius()) {
                                     selectedBall = ball.get();
 
                                     // Make Arrow
