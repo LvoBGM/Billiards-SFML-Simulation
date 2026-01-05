@@ -112,7 +112,7 @@ int main()
             window.draw(*ball);
         }
         if (tPressed) {
-            for (const Arrow* arrow : Arrow::s_Arrows) {
+            for (const Arrow* arrow : Arrow::s_ArrowsToDraw) {
                 if (arrow) {
                     window.draw(*arrow);
                 }

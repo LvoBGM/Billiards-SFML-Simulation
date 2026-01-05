@@ -1,5 +1,5 @@
 #include "Arrow.h"
-Arrow::Arrow() // TODO: Add something to tell the porgramm not to draw specific arrows
+Arrow::Arrow()
 {
 	m_vector = {0.f, 0.f};
 	m_color = sf::Color::Red;
@@ -8,7 +8,7 @@ Arrow::Arrow() // TODO: Add something to tell the porgramm not to draw specific 
 }
 Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 	// Add arrow to s_Arrows
-	s_Arrows.insert(this);
+	s_ArrowsToDraw.insert(this);
 
 	m_vector = end - origin;
 	m_color = color;
@@ -18,7 +18,18 @@ Arrow::Arrow(sf::Vector2f origin, sf::Vector2f end, sf::Color color) {
 }
 
 Arrow::~Arrow() {
-	s_Arrows.erase(this);
+	s_ArrowsToDraw.erase(this);
+}
+
+// Adds (or removes) the arrow from the ArrowsToDraw set
+void Arrow::toBeDrawn(bool b)
+{
+	if (b) {
+		s_ArrowsToDraw.insert(this);
+	}
+	else {
+		s_ArrowsToDraw.erase(this);
+	}
 }
 
 void Arrow::setVector(const sf::Vector2f& v) {
