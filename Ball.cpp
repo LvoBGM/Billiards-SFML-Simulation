@@ -65,7 +65,6 @@ void Ball::calcFuturePos(const float& dt, const sf::Vector2u& windowSize) {
 	auto position = getPosition();
 	while (_wallCheck(position)) {
 		position = m_futurePosition;
-		std::cout << "Hit wall!\n";
 	}
 }
 
@@ -200,7 +199,6 @@ void Ball::checkForCollisions(const float& dt)
 				std::pair<sf::Vector2f, sf::Vector2f> jHitI1 = ballCollision(ball2, ball1);
 
 				if (iHitJ1 == std::pair<sf::Vector2f, sf::Vector2f>{ {0, 0}, { 0, 0 } }&& iHitJ1 == std::pair<sf::Vector2f, sf::Vector2f> { {0, 0}, { 0, 0 } }) {
-					std::cout << "dsada";
 				}
 
 				// Get pairs of new velocities
@@ -219,10 +217,6 @@ void Ball::checkForCollisions(const float& dt)
 				// Recalculate future position
 				ball1->setFuturePosition(ball1->getPosition() + ball1->getNextForce() * dt);
 				ball2->setFuturePosition(ball2->getPosition() + ball2->getNextForce() * dt);
-
-				if (ball1->getNextForce().length() != 0) {
-					std::cout << ball1->getNextForce().length() << std::endl;
-				}
 			}
 		}
 	}
@@ -246,10 +240,6 @@ std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<
 		return { {0, 0}, {0, 0} };
 	}
 
-	/*std::cout << "{ " << finalForce.normalized().x << ", " << finalForce.normalized().y << " }" << " angle to"
-		<< "{ " << thisToBallVector.normalized().x << ", " << thisToBallVector.normalized().y << " }" << " = " <<
-		beta.asDegrees() << std::endl;*/
-
 	sf::Angle alpha;
 	if (beta < sf::degrees(0)) {
 		alpha = sf::degrees(-90) - beta;
@@ -257,8 +247,6 @@ std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<
 	else {
 		alpha = sf::degrees(90) - beta;
 	}
-
-	//std::cout << getFillColor().toInteger() << " Ball hit at angle: " << beta.asDegrees() << std::endl;
 
 	// Check if angle is close to 180
 	if (std::abs((beta - sf::radians(3.1415f)).asRadians()) < 0.01f) {
@@ -275,12 +263,8 @@ std::pair<sf::Vector2f, sf::Vector2f> Ball::ballCollision(const std::unique_ptr<
 	sf::Angle hitBallAngle = hitterNextForce.angle() + beta;
 	float hitBallLength = nextForceLength * std::sin(std::abs(alpha.asRadians()));
 
-	//std::cout << "Hitter vector: " << newFinalForceLength << ", " << newFinalForceAngle.asDegrees() << std::endl;
 	sf::Vector2f hitterBallVector = { newFinalForceLength, newFinalForceAngle };
 	sf::Vector2f hitBallVector = { hitBallLength, hitBallAngle };
-
-	//std::cout << "Pushing hit ball with vector: " << hitBallVector.x << ", " << hitBallVector.y << std::endl;
-	//std::cout << "Pushing hitter ball with vector " << hitterBallVector.x << ", " << hitBallVector.y << std::endl;
 
 	return { hitterBallVector, hitBallVector };
 	
