@@ -46,6 +46,7 @@ int main()
                                     // Make Arrow
                                     auto mirroredMousePosition = sf::Vector2f(selectedBall->getPosition().x * 2, selectedBall->getPosition().y * 2) - localMousePosition;
                                     arrowPtr = std::make_unique<Arrow>(selectedBall->getPosition(), mirroredMousePosition, selectedBall->getFillColor());
+                                    arrowPtr->setVector(arrowPtr->getVector() * poolCuePower);
 
                                     selectedBall = ball.get();
                                     paused = true;
@@ -66,7 +67,7 @@ int main()
                 if (keyReleased->button == sf::Mouse::Button::Left) {
                     if (paused) {
                         sf::Vector2f localMousePosition = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-                        selectedBall->setNextForce(arrowPtr->getVector() * poolCuePower);
+                        selectedBall->setNextForce(arrowPtr->getVector());
 
                         selectedBall = nullptr;
                         arrowPtr = nullptr;
@@ -101,7 +102,7 @@ int main()
                 auto mirroredMousePosition = sf::Vector2f(selectedBall->getPosition().x * 2, selectedBall->getPosition().y * 2) - localMousePosition;
 
                 // Update Arrow
-                arrowPtr->setVector(mirroredMousePosition - selectedBall->getPosition());
+                arrowPtr->setVector((mirroredMousePosition - selectedBall->getPosition()) * poolCuePower);
                 arrowPtr->setPosition(selectedBall->getPosition() + arrowPtr->getVector().normalized() * selectedBall->getRadius());
             }
         }
