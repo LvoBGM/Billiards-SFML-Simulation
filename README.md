@@ -13,7 +13,7 @@ The further the cursor is the stronger the velocity of the ball.
 
 <img src="Images/move.gif" alt="Gif of user aiming and lanchung ball" width="350"/>
 
-You can spawn a new ball by pressing the right mouse button
+You can spawn a new ball by pressing the r**ight mouse button**
 
 <img src="Images/spawn.gif" alt="Giff of user spawning a green ball" width="350"/>
 
@@ -23,3 +23,7 @@ When 2 balls will occupy the same space next frame, the programm will simulate a
 of the system is conserved before and after impact.
 
 <img src="Images/collide.gif" alt="Gif of user launching one ball at another" width="350"/>
+
+## Arrows
+
+When a ball is moving an arrow will show the direction in which it is moving, this also applies when aiming a ball. You can turn arrows on and off by pressing the **t** key.
